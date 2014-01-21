@@ -45,7 +45,6 @@ function($rootScope, MeteorCollections, $meteorObject) {
 	function CollectionFactory(collection) {
 		var collection = MeteorCollections.getCollection(collection);
 		var value = [];
-
 		function Collection(value) {
 			value = {};
 		}
@@ -54,24 +53,33 @@ function($rootScope, MeteorCollections, $meteorObject) {
 		Collection.observe = function(cursor, array) {
 			cursor.observe({
 				"addedAt" : function(document, atIndex, before) {
-					//console.log(document);
-
 					if (!array) {
 						value = new $meteorObject(collection, document);
 					}
-					if (array) {
-						value[atIndex] = new $meteorObject(collection, document);
+					else{
+						if(atIndex === 0){
+							value.unshift(new $meteorObject(collection, document))
+						}else{
+							value[atIndex] = new $meteorObject(collection, document);
+						}
+						
 					}
 					$rootScope.apply();
 				},
 				"changedAt" : function(newDocument, oldDocument, atIndex) {
-
-					value[atIndex] = new $meteorObject(collection, newDocument);
+					if(!array){
+					   angular.extend(value, newDocument);
+					}else{
+						value[atIndex] = new $meteorObject(collection, newDocument);
+					}
 					$rootScope.apply();
 				},
 				"removedAt" : function(oldDocument, atIndex) {
-
-					value.splice(atIndex, 1);
+					if(!array){
+						angular.copy({},value);
+					}else {
+						value.splice(atIndex, 1);
+					}
 					$rootScope.apply();
 				}
 			})
@@ -83,7 +91,6 @@ function($rootScope, MeteorCollections, $meteorObject) {
 		}
 		Collection.findOne = function(selector, options, callback) {
 			value = this instanceof Collection ? this : {};
-			value = new $meteorObject(collection,collection.find(selector,options).fetch()[0]);
 			this.observe(collection.find(selector, options), false);
 			return value;
 		}
