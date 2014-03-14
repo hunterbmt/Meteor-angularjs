@@ -2,13 +2,20 @@ angular.module("meteor", []).service("MeteorCollections", [
 function() {
 	var self = this;
 	self.collections = {};
-	self.getCollection = function(name) {
-		if (self.collections[name]) {
-			return self.collections[name];
-		} else {
-			self.collections[name] = new Meteor.Collection(name);
-			return self.collections[name];
+	self.getCollection = function(collection) {
+		if(collection instanceof Meteor.Collection){
+			return collection;
 		}
+		else{
+			if (self.collections[collection]) {
+				return self.collections[collection];
+			} else {
+				self.collections[collection] = new Meteor.Collection(collection);
+				return self.collections[collection];
+			}
+		}
+		
+		
 	}
 	return self;
 
